@@ -1,0 +1,39 @@
+services:
+
+  db_mongo:
+    image: mongo:latest
+    container_name: mockshop-db_mongo
+    ports:
+      - "27017:27017"
+    networks:
+      - mockshop-network
+    volumes:
+      - db_mongo-data:/data/db
+      - db_mongo-config:/data/configdb
+      - ./db_mongo/initdb:/docker-entrypoint-initdb.d
+    secrets:
+      - db_mongo-password
+    environment:
+      MONGO_INITDB_DATABASE: mockshop_db
+      MONGO_INITDB_ROOT_USERNAME: liza31
+      MONGO_INITDB_ROOT_PASSWORD_FILE: /run/secrets/db_mongo-password
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      start_period: 30s
+      interval: 15s
+      timeout: 5s
+      retries: 5
+
+
+networks:
+  mockshop-network:
+
+
+volumes:
+  db_mongo-data:
+  db_mongo-config:
+
+
+secrets:
+  db_mongo-password:
+    file: .secrets/db_mongo-password.txt
