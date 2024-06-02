@@ -1,0 +1,34 @@
+services:
+
+  db_neo4j:
+    image: neo4j:${DB_NEO4J_IMGTAG:-latest}
+    container_name: mockshop-db_neo4j
+    ports:
+      - 7687:7687
+      - 7474:7474
+    networks:
+      - mockshop-network
+    volumes:
+      - db_neo4j-data:/data
+      - db_neo4j-logs:/logs
+      - ./db_neo4j/conf:/conf:ro
+      - ./db_neo4j/initdb:/initdb:ro
+    environment:
+      NEO4J_PLUGINS: '["apoc", "apoc-extended"]'
+      NEO4J_initial_dbms_default__database: mockshop-db
+      NEO4J_AUTH: neo4j/${DB_NEO4J_ADMIN_PASSWORD:-password}
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "localhost:7474"]
+      start_period: 30s
+      interval: 15s
+      timeout: 5s
+      retries: 5
+
+
+networks:
+  mockshop-network:
+
+
+volumes:
+  db_neo4j-data:
+  db_neo4j-logs:
